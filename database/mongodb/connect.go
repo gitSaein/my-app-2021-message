@@ -3,18 +3,26 @@ package mongodb
 import (
 	"context"
 	"log"
+	"time"
+
+	config "my-app-2021-message/config"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func mongoConn() (client *mongo.Client) {
-	// credentials := options.Credential{
-	// 	Username: "root",
-	// 	Password: "App2021!",
-	// }
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+func init() {
+
+}
+
+func mongoConn(env string) (*mongo.Client, context.Context, context.CancelFunc, config.Config) {
+
+	config := config.GetCongif(env)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+
+	clientOptions := options.Client().ApplyURI(config.Database.Uri)
+	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -25,6 +33,6 @@ func mongoConn() (client *mongo.Client) {
 
 	log.Println("MongoDB Connected")
 
-	return client
+	return client, ctx, cancel, config
 
 }
