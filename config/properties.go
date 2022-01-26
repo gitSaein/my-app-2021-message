@@ -8,11 +8,21 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type MongoDB struct {
+	MessageDatabase   string `yaml:"messageDatabase"`
+	MessageCollection string `yaml:"messageCollection"`
+	Uri               string `yaml:"uri"`
+	User              string `yaml:"user"`
+	Pwd               string `yaml:"pwd"`
+}
+
+type RabbitMQ struct {
+	Url string `yaml:"url"`
+}
+
 type DatabaseConfig struct {
-	Type              string `yaml:"Type"`
-	MessageDatabase   string `yaml:"MessageDatabase"`
-	MessageCollection string `yaml:"MessageCollection"`
-	Uri               string `yaml:"Uri"`
+	MongoDB  MongoDB  `yaml:"mongodb"`
+	RabbitMQ RabbitMQ `yaml:"rabbitmq"`
 }
 
 // Config Type

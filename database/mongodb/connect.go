@@ -15,24 +15,30 @@ func init() {
 
 }
 
-func mongoConn(env string) (*mongo.Client, context.Context, context.CancelFunc, config.Config) {
-
+func mongoConn(env string) (*mongo.Client, context.Context, context.CancelFunc, config.Config, error) {
+	var err error
 	config := config.GetCongif(env)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	credentials := options.Credential{
+		Username: config.Database.MongoDB.User,
+		Password: config.Database.MongoDB.Pwd,
+	}
+	clientOptions := options.Client().
+		ApplyURI(config.Database.MongoDB.Uri).
+		SetAuth(credentials)
 
-	clientOptions := options.Client().ApplyURI(config.Database.Uri)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		log.Fatal(err)
+		err = err
 	}
 
 	if err = client.Ping(context.TODO(), nil); err != nil {
-		log.Fatal(err)
+		err = err
 	}
 
 	log.Println("MongoDB Connected")
 
-	return client, ctx, cancel, config
+	return client, ctx, cancel, config, err
 
 }

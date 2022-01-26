@@ -1,5 +1,9 @@
 database:
-  Type: mongodb
-  MessageDatabase: local
-  MessageCollection: message
-  Uri: mongodb://localhost:27017
+  mongodb:
+    messageDatabase: admin
+    messageCollection: message
+    uri: mongodb://localhost:27017
+    user: root
+    pwd: App2021!
+  rabbitmq:
+    url: amqp://guest:guest@localhost:5672/

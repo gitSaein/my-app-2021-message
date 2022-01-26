@@ -8,15 +8,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const message_database = "local"
-const message_collection = "message"
+func descSort() {
+
+}
 
 func InsertMessage(env string) {
-	client, ctx, cancel, config := mongoConn(env)
+	client, ctx, cancel, config, err := mongoConn(env)
 	defer client.Disconnect(ctx)
 	defer cancel()
 
-	collection := client.Database(config.Database.MessageDatabase).Collection(config.Database.MessageCollection)
+	collection := client.
+		Database(config.Database.MongoDB.MessageDatabase).
+		Collection(config.Database.MongoDB.MessageCollection)
 	message := MessageEntity{UserId: 1, RoomId: 2, Message: "hi", Time: time.Now()}
 
 	res, err := collection.InsertOne(ctx, message)
@@ -28,11 +31,13 @@ func InsertMessage(env string) {
 
 func FindMessagesByRoomIdx(env string, roomId int) {
 
-	client, ctx, cancel, config := mongoConn(env)
+	client, ctx, cancel, config, err := mongoConn(env)
 	defer client.Disconnect(ctx)
 	defer cancel()
 
-	collection := client.Database(config.Database.MessageDatabase).Collection(config.Database.MessageCollection)
+	collection := client.
+		Database(config.Database.MongoDB.MessageDatabase).
+		Collection(config.Database.MongoDB.MessageCollection)
 	// filter := MessageEntity{RoomId: roomId}
 
 	opts := options.Find().SetSort(bson.D{{"time", 1}})

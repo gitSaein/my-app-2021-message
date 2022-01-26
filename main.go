@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	mongoClient "my-app-2021-message/database/mongodb"
+	rabbitmq "my-app-2021-message/database/rabbitmq"
 )
 
 var env string = ""
@@ -18,6 +19,9 @@ func init() {
 }
 
 func main() {
+
 	mongoClient.InsertMessage(env)
 	mongoClient.FindMessagesByRoomIdx(env, 2)
+	rabbitmq.ConnRabbitMq(env)
+
 }
