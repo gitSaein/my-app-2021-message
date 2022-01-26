@@ -20,8 +20,15 @@ func init() {
 
 func main() {
 
-	mongoClient.InsertMessage(env)
-	mongoClient.FindMessagesByRoomIdx(env, 2)
+	client := mongoClient.MongoConn(env)
+	defer client.Conn.Disconnect(client.Ctx)
+	defer client.Cancel()
+	if client.Err != nil {
+		panic(client.Err)
+	}
+
+	mongoClient.InsertMessage(client)
+	mongoClient.FindMessagesByRoomIdx(client, 2)
 	rabbitmq.ConnRabbitMq(env)
 
 }

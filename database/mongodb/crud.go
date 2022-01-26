@@ -8,51 +8,42 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+func init() {
+	log.Println("start mongo")
+}
+
 func descSort() {
 
 }
 
-func InsertMessage(env string) {
-	client, ctx, cancel, config, err := mongoConn(env)
-	defer client.Disconnect(ctx)
-	defer cancel()
+func InsertMessage(connInfo *ConnInfo) {
 
-	collection := client.
-		Database(config.Database.MongoDB.MessageDatabase).
-		Collection(config.Database.MongoDB.MessageCollection)
 	message := MessageEntity{UserId: 1, RoomId: 2, Message: "hi", Time: time.Now()}
 
-	res, err := collection.InsertOne(ctx, message)
+	res, err := connInfo.Collection.InsertOne(connInfo.Ctx, message)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Printf("inserted document with ID %v\n", res.InsertedID)
 }
 
-func FindMessagesByRoomIdx(env string, roomId int) {
-
-	client, ctx, cancel, config, err := mongoConn(env)
-	defer client.Disconnect(ctx)
-	defer cancel()
-
-	collection := client.
-		Database(config.Database.MongoDB.MessageDatabase).
-		Collection(config.Database.MongoDB.MessageCollection)
-	// filter := MessageEntity{RoomId: roomId}
+func FindMessagesByRoomIdx(connInfo *ConnInfo, roomId int) ([]MessageEntity, error) {
+	var results []MessageEntity
 
 	opts := options.Find().SetSort(bson.D{{"time", 1}})
 
-	cursor, err := collection.Find(ctx, bson.D{{"room_id", roomId}}, opts)
+	cursor, err := connInfo.Collection.Find(connInfo.Ctx,
+		bson.D{{"room_id", roomId}}, opts)
 	if err != nil {
-		log.Fatal(err)
+		return results, err
 	}
-	defer cursor.Close(ctx)
+	defer cursor.Close(connInfo.Ctx)
 
-	var results []MessageEntity
-	if err = cursor.All(ctx, &results); err != nil {
-		log.Fatal(err)
+	if err = cursor.All(connInfo.Ctx, &results); err != nil {
+		return results, err
 	}
 	for _, result := range results {
 		log.Println(result)
 	}
+	return results, nil
 }

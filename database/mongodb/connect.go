@@ -2,7 +2,6 @@ package mongodb
 
 import (
 	"context"
-	"log"
 	"time"
 
 	config "my-app-2021-message/config"
@@ -11,12 +10,20 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type ConnInfo struct {
+	Conn       *mongo.Client
+	Ctx        context.Context
+	Config     config.Config
+	Cancel     context.CancelFunc
+	Collection *mongo.Collection
+	Err        error
+}
+
 func init() {
 
 }
 
-func mongoConn(env string) (*mongo.Client, context.Context, context.CancelFunc, config.Config, error) {
-	var err error
+func MongoConn(env string) *ConnInfo {
 	config := config.GetCongif(env)
 
 	credentials := options.Credential{
@@ -30,15 +37,16 @@ func mongoConn(env string) (*mongo.Client, context.Context, context.CancelFunc, 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		err = err
+		return &ConnInfo{client, ctx, config, cancel, nil, err}
 	}
 
 	if err = client.Ping(context.TODO(), nil); err != nil {
-		err = err
+		return &ConnInfo{client, ctx, config, cancel, nil, err}
 	}
 
-	log.Println("MongoDB Connected")
-
-	return client, ctx, cancel, config, err
+	collection := client.
+		Database(config.Database.MongoDB.MessageDatabase).
+		Collection(config.Database.MongoDB.MessageCollection)
+	return &ConnInfo{client, ctx, config, cancel, collection, nil}
 
 }
