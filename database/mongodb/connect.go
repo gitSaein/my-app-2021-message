@@ -23,14 +23,15 @@ func init() {
 
 }
 
-func MongoConn(env string) *ConnInfo {
+func Conn(env string) *ConnInfo {
 	config := config.GetCongif(env)
 
 	credentials := options.Credential{
 		Username: config.Database.MongoDB.User,
 		Password: config.Database.MongoDB.Pwd,
 	}
-	clientOptions := options.Client().
+	clientOptions := options.
+		Client().
 		ApplyURI(config.Database.MongoDB.Uri).
 		SetAuth(credentials)
 

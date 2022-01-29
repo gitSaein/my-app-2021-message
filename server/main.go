@@ -3,7 +3,8 @@ package main
 import (
 	"flag"
 	mongoClient "my-app-2021-message/database/mongodb"
-	rabbitmq "my-app-2021-message/database/rabbitmq"
+	service "my-app-2021-message/service"
+	"time"
 )
 
 var env string = ""
@@ -20,15 +21,8 @@ func init() {
 
 func main() {
 
-	client := mongoClient.MongoConn(env)
-	defer client.Conn.Disconnect(client.Ctx)
-	defer client.Cancel()
-	if client.Err != nil {
-		panic(client.Err)
-	}
-
-	mongoClient.InsertMessage(client)
-	mongoClient.FindMessagesByRoomIdx(client, 2)
-	rabbitmq.ConnRabbitMq(env)
+	message := mongoClient.
+		MessageEntity{UserId: 1, RoomId: 2, Message: "hi2", Time: time.Now()}
+	service.Send(env, message)
 
 }

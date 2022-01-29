@@ -2,7 +2,6 @@ package mongodb
 
 import (
 	"log"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -16,15 +15,14 @@ func descSort() {
 
 }
 
-func InsertMessage(connInfo *ConnInfo) {
-
-	message := MessageEntity{UserId: 1, RoomId: 2, Message: "hi", Time: time.Now()}
+func Insert(connInfo *ConnInfo, message MessageEntity) error {
 
 	res, err := connInfo.Collection.InsertOne(connInfo.Ctx, message)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	log.Printf("inserted document with ID %v\n", res.InsertedID)
+	return nil
 }
 
 func FindMessagesByRoomIdx(connInfo *ConnInfo, roomId int) ([]MessageEntity, error) {
