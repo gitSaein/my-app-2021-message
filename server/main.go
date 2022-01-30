@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	mongoClient "my-app-2021-message/database/mongodb"
 	service "my-app-2021-message/service"
 	"time"
@@ -24,5 +25,6 @@ func main() {
 	message := mongoClient.
 		MessageEntity{UserId: 1, RoomId: 2, Message: "hi2", Time: time.Now()}
 	service.Send(env, message)
+	fmt.Println("Main")
 
 }

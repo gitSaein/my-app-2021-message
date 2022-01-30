@@ -17,7 +17,8 @@ type MongoDB struct {
 }
 
 type RabbitMQ struct {
-	Url string `yaml:"url"`
+	Url       string `yaml:"url"`
+	QueueName string `yaml:"queueName"`
 }
 
 type DatabaseConfig struct {

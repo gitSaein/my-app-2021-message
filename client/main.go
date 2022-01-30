@@ -18,7 +18,5 @@ func init() {
 }
 
 func main() {
-
 	service.Receiver(env)
-
 }

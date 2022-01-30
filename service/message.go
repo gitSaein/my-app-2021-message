@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log"
 	mongoClient "my-app-2021-message/database/mongodb"
 	rabbitmq "my-app-2021-message/database/rabbitmq"
 	errors "my-app-2021-message/util/errors"
@@ -13,8 +14,12 @@ import (
 func Send(env string, message mongoClient.MessageEntity) {
 	client := mongoClient.Conn(env)
 	defer func() {
+		if r := recover(); r != nil {
+			log.Println("[ ERROR ]", r)
+		}
 		client.Cancel()
 		client.Conn.Disconnect(client.Ctx)
+
 	}()
 	errors.Check(client.Err)
 
@@ -22,6 +27,7 @@ func Send(env string, message mongoClient.MessageEntity) {
 	errors.Check(err)
 
 	mqClient := rabbitmq.Conn(env)
+	errors.Check(mqClient.Err)
 	defer func() {
 		mqClient.Conn.Close()
 		mqClient.Channel.Close()

@@ -35,7 +35,7 @@ func Conn(env string) *ConnInfo {
 		ApplyURI(config.Database.MongoDB.Uri).
 		SetAuth(credentials)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		return &ConnInfo{client, ctx, config, cancel, nil, err}
