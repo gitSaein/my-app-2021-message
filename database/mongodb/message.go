@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"log"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -11,22 +12,26 @@ func init() {
 	log.Println("start mongo")
 }
 
-func descSort() {
-
+type Message struct {
+	ID      interface{} `bson:"_id,omitempty"`
+	UserId  int         `bson:"user_id"`
+	RoomId  int         `bson:"room_id"`
+	Message string
+	Time    time.Time
 }
 
-func Insert(connInfo *ConnInfo, message MessageEntity) error {
-
+func Insert(connInfo *ConnInfo, message *Message) error {
+	message.Time = time.Now()
 	res, err := connInfo.Collection.InsertOne(connInfo.Ctx, message)
 	if err != nil {
 		return err
 	}
-	log.Printf("inserted document with ID %v\n", res.InsertedID)
+	message.ID = res.InsertedID
 	return nil
 }
 
-func FindMessagesByRoomIdx(connInfo *ConnInfo, roomId int) ([]MessageEntity, error) {
-	var results []MessageEntity
+func FindListByRoomIdx(connInfo *ConnInfo, roomId int) ([]Message, error) {
+	var results []Message
 
 	opts := options.Find().SetSort(bson.D{{"time", 1}})
 

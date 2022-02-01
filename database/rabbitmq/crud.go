@@ -2,7 +2,7 @@ package rabbitmq
 
 import (
 	"log"
-	errors "my-app-2021-message/util/errors"
+	errors "my-app-2021-message/errors"
 
 	"github.com/rabbitmq/amqp091-go"
 )

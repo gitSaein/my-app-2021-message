@@ -1,4 +1,4 @@
-package service
+package chat
 
 /*
 1. 채팅방 생성

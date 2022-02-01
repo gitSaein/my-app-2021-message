@@ -3,7 +3,6 @@ package config
 import (
 	"io/ioutil"
 	"log"
-	filePath "my-app-2021-message/constants"
 
 	"gopkg.in/yaml.v2"
 )
@@ -34,7 +33,7 @@ type Config struct {
 func propertiesByEnvironment(env string) string {
 	switch env {
 	case "local":
-		return filePath.LOCAL_PROPERTIEIES
+		return LOCAL_PROPERTIEIES
 	default:
 		return ""
 	}
