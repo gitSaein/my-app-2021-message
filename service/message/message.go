@@ -32,16 +32,21 @@ func Send(env string, message *mongoClient.Message) {
 		mqClient.Conn.Close()
 		mqClient.Channel.Close()
 	}()
-	rabbitmq.Publish(mqClient, message.Message)
+	rabbitmq.ExchangePublish(mqClient, message)
 }
 
-func Receiver(env string) {
+func Receiver(env string, roomId int, userId int) {
 	mqClient := rabbitmq.Conn(env)
+	errors.Check(mqClient.Err)
+
 	defer func() {
+		if r := recover(); r != nil {
+			log.Println("[ ERROR ]", r)
+		}
 		mqClient.Conn.Close()
 		mqClient.Channel.Close()
 	}()
-	rabbitmq.Consume(mqClient)
+	rabbitmq.ExchangeConsume(mqClient, roomId, userId)
 }
 
 func GetList(env string, roomIdx int) []mongoClient.Message {

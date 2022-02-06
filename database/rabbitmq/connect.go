@@ -11,6 +11,7 @@ type RabbitMQ struct {
 	Channel *amqp.Channel
 	Conn    *amqp.Connection
 	Queue   amqp.Queue
+	Config  conf.Config
 	Err     error
 }
 
@@ -29,11 +30,6 @@ func Conn(env string) *RabbitMQ {
 		return &RabbitMQ{Err: err}
 
 	}
-	q, err := ch.QueueDeclare(conf.Database.RabbitMQ.QueueName, false, false, false, false, nil)
-	if err != nil {
-		return &RabbitMQ{Err: err}
-
-	}
-	return &RabbitMQ{Channel: ch, Queue: q, Conn: conn}
+	return &RabbitMQ{Channel: ch, Conn: conn, Config: conf}
 
 }

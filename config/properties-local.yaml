@@ -7,4 +7,6 @@ database:
     pwd: App2021!
   rabbitmq:
     url: amqp://guest:guest@localhost:5672/
-    queueName: Message
+    queueNameByUser: message.queue.%d
+    exchangeName: message.exchange.topic
+    messageRoutingKey: room.%d

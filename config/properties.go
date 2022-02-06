@@ -7,6 +7,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const LOCAL_PROPERTIEIES = "../config/properties-local.yaml"
+
 type MongoDB struct {
 	MessageDatabase   string `yaml:"messageDatabase"`
 	MessageCollection string `yaml:"messageCollection"`
@@ -16,8 +18,10 @@ type MongoDB struct {
 }
 
 type RabbitMQ struct {
-	Url       string `yaml:"url"`
-	QueueName string `yaml:"queueName"`
+	Url               string `yaml:"url"`
+	QueueNameByUser   string `yaml:"queueNameByUser"`
+	ExchangeName      string `yaml:"exchangeName"`
+	MessageRoutingKey string `yaml:"messageRoutingKey"`
 }
 
 type DatabaseConfig struct {
