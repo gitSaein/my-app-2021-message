@@ -11,6 +11,7 @@ func init() {
 
 type Chat struct {
 	ID       interface{} `bson:"_id,omitempty"`
+	UserId   int         `bson:"user_id"`
 	RoomId   int         `bson:"room_id"`
 	RoomName string      `bson:"rom_name"`
 	Time     time.Time

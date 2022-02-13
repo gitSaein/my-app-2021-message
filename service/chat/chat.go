@@ -1,7 +1,6 @@
 package chat
 
 import (
-	"fmt"
 	"log"
 	"my-app-2021-message/database/mongodb"
 	"my-app-2021-message/database/rabbitmq"
@@ -50,21 +49,22 @@ func Create(env string, chat mongodb.Chat, participants []int) {
 
 			err := rabbitmq.MakeExchangeQueueBind(mqClient, p, chat.RoomId)
 
-			message := mongodb.Message{
-				UserId: p,
-				RoomId: chat.RoomId,
-				Type:   message.CreateMsg,
-				Time:   time.Now(),
-			}
-
-			rabbitmq.ExchangePublish(mqClient, message)
 			return err
 		})
 
 	}
-	if err := g.Wait(); err == nil {
-		fmt.Println("Successfully fetched all URLs.")
+	if err := g.Wait(); err != nil {
+		errors.Check(err)
 	}
+
+	message := mongodb.Message{
+		UserId: chat.UserId,
+		RoomId: chat.RoomId,
+		Type:   message.CreateMsg,
+		Time:   time.Now(),
+	}
+
+	rabbitmq.ExchangePublish(mqClient, message)
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("[ ERROR ]", r)

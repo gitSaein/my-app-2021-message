@@ -63,8 +63,11 @@ func Chat(env string) http.HandlerFunc {
 
 		defer func() {
 			if r := recover(); r != nil {
-				respondWithJSON(w, http.StatusBadRequest, r)
-				log.Printf("[ERROR][%d] %v", http.StatusBadRequest, r)
+				err, ok := r.(error)
+				if ok {
+					respondWithJSON(w, http.StatusInternalServerError, err)
+					log.Printf("[ERROR][%d] %v", http.StatusInternalServerError, err)
+				}
 
 			}
 		}()
