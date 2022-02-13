@@ -1,7 +1,9 @@
 database:
   mongodb:
-    messageDatabase: admin
+    database: admin
     messageCollection: message
+    chatCollection: chat
+    participantCollection: participant
     uri: mongodb://localhost:27017
     user: root
     pwd: App2021!

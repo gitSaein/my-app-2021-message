@@ -17,10 +17,11 @@ type Message struct {
 	UserId  int         `bson:"user_id"`
 	RoomId  int         `bson:"room_id"`
 	Message string
+	Type    string
 	Time    time.Time
 }
 
-func Insert(connInfo *ConnInfo, message *Message) error {
+func Insert(connInfo *ConnInfo, message Message) error {
 	message.Time = time.Now()
 	res, err := connInfo.Collection.InsertOne(connInfo.Ctx, message)
 	if err != nil {

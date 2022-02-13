@@ -11,8 +11,8 @@ var userId int = 0
 
 func init() {
 	envf := flag.String("env", "local", "server environment")
-	roomIdf := flag.Int("roomId", 0, "roomId")
-	userIdf := flag.Int("userId", 0, "userId")
+	roomIdf := flag.Int("roomId", 2, "roomId")
+	userIdf := flag.Int("userId", 10, "userId")
 	flag.Parse()
 
 	if flag.NFlag() == 0 { // 명령줄 옵션의 개수가 0개이면

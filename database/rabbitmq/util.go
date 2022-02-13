@@ -1,9 +1,10 @@
 package rabbitmq
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
-	mongoClient "my-app-2021-message/database/mongodb"
+	mongo "my-app-2021-message/database/mongodb"
 	errors "my-app-2021-message/errors"
 
 	"github.com/rabbitmq/amqp091-go"
@@ -44,13 +45,14 @@ func Consume(mq *RabbitMQ) {
 	<-forever
 }
 
-func ExchangePublish(mq *RabbitMQ, m *mongoClient.Message) {
+func ExchangePublish(mq *RabbitMQ, m mongo.Message) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("[ ERROR ]", r)
 		}
 
 	}()
+
 	err := mq.Channel.ExchangeDeclare(
 		mq.Config.Database.RabbitMQ.ExchangeName,
 		ExchangeTopic,
@@ -61,6 +63,9 @@ func ExchangePublish(mq *RabbitMQ, m *mongoClient.Message) {
 		nil)
 	errors.Check(err)
 
+	marshaledMsg, err := json.Marshal(m)
+	errors.Check(err)
+
 	err = mq.Channel.Publish(
 		mq.Config.Database.RabbitMQ.ExchangeName,                             // exchange
 		fmt.Sprintf(mq.Config.Database.RabbitMQ.MessageRoutingKey, m.RoomId), // routing key
@@ -68,7 +73,7 @@ func ExchangePublish(mq *RabbitMQ, m *mongoClient.Message) {
 		false, // immediate
 		amqp091.Publishing{
 			ContentType: "text/plain",
-			Body:        []byte(m.Message),
+			Body:        []byte(marshaledMsg),
 		})
 	errors.Check(err)
 
@@ -101,6 +106,7 @@ func ExchangeConsume(mq *RabbitMQ, roomId int, userId int) {
 	log.Printf("Binding queue %s to exchange %s with routing key %s",
 		q.Name, mq.Config.Database.RabbitMQ.ExchangeName,
 		fmt.Sprintf(mq.Config.Database.RabbitMQ.MessageRoutingKey, roomId))
+
 	err = mq.Channel.QueueBind(
 		q.Name, // queue name
 		fmt.Sprintf(mq.Config.Database.RabbitMQ.MessageRoutingKey, roomId), // routing key
@@ -124,10 +130,55 @@ func ExchangeConsume(mq *RabbitMQ, roomId int, userId int) {
 
 	go func() {
 		for d := range msgs {
-			log.Printf(" [x] %s", d.Body)
+			var message mongo.Message
+
+			err := json.Unmarshal(d.Body, &message)
+			errors.Check(err)
+			log.Printf(" [x] %v", message)
 		}
 	}()
 
 	log.Printf(" [*] Waiting for logs. To exit press CTRL+C")
 	<-forever
+}
+
+func MakeExchangeQueueBind(mq *RabbitMQ, userId int, roomId int) error {
+
+	if err := mq.Channel.ExchangeDeclare(
+		mq.Config.Database.RabbitMQ.ExchangeName,
+		ExchangeTopic,
+		true,  // durable
+		false, // auto-deleted
+		false, // internal
+		false, // no-wait
+		nil,   // arguments
+	); err != nil {
+		return err
+	}
+
+	q, err := mq.Channel.QueueDeclare(
+		fmt.Sprintf(mq.Config.Database.RabbitMQ.QueueNameByUser, userId), // name
+		true,  // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Binding queue %s to exchange %s with routing key %s",
+		q.Name, mq.Config.Database.RabbitMQ.ExchangeName,
+		fmt.Sprintf(mq.Config.Database.RabbitMQ.MessageRoutingKey, roomId))
+
+	if err := mq.Channel.QueueBind(
+		q.Name, // queue name
+		fmt.Sprintf(mq.Config.Database.RabbitMQ.MessageRoutingKey, roomId), // routing key
+		mq.Config.Database.RabbitMQ.ExchangeName,                           // exchange
+		false,
+		nil); err != nil {
+		return err
+	}
+	return nil
 }

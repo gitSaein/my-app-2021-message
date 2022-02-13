@@ -10,11 +10,13 @@ import (
 const LOCAL_PROPERTIEIES = "../config/properties-local.yaml"
 
 type MongoDB struct {
-	MessageDatabase   string `yaml:"messageDatabase"`
-	MessageCollection string `yaml:"messageCollection"`
-	Uri               string `yaml:"uri"`
-	User              string `yaml:"user"`
-	Pwd               string `yaml:"pwd"`
+	Database              string `yaml:"database"`
+	MessageCollection     string `yaml:"messageCollection"`
+	ParticipantCollection string `yaml:"participantCollection"`
+	ChatCollection        string `yaml:"chatCollection"`
+	Uri                   string `yaml:"uri"`
+	User                  string `yaml:"user"`
+	Pwd                   string `yaml:"pwd"`
 }
 
 type RabbitMQ struct {

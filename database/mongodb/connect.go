@@ -2,6 +2,8 @@ package mongodb
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
 	config "my-app-2021-message/config"
@@ -19,11 +21,12 @@ type ConnInfo struct {
 	Err        error
 }
 
-func init() {
+const (
+	CHAT    = "chat"
+	MESSAGE = "message"
+)
 
-}
-
-func Conn(env string) *ConnInfo {
+func connect(env string) *ConnInfo {
 	config := config.GetCongif(env)
 
 	credentials := options.Credential{
@@ -38,16 +41,38 @@ func Conn(env string) *ConnInfo {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		return &ConnInfo{client, ctx, config, cancel, nil, err}
+		return &ConnInfo{
+			Conn: client, Ctx: ctx, Config: config, Cancel: cancel, Err: err}
 	}
 
 	if err = client.Ping(context.TODO(), nil); err != nil {
-		return &ConnInfo{client, ctx, config, cancel, nil, err}
+		return &ConnInfo{
+			Conn: client, Ctx: ctx, Config: config, Cancel: cancel, Err: err}
 	}
+	return &ConnInfo{
+		Conn: client, Ctx: ctx, Config: config, Cancel: cancel}
+}
 
-	collection := client.
-		Database(config.Database.MongoDB.MessageDatabase).
-		Collection(config.Database.MongoDB.MessageCollection)
-	return &ConnInfo{client, ctx, config, cancel, collection, nil}
+func ApproachCollection(env string, collection string) *ConnInfo {
+	client := connect(env)
+
+	switch collection {
+	case CHAT:
+		client.Collection = client.Conn.
+			Database(client.Config.Database.MongoDB.Database).
+			Collection(client.Config.Database.MongoDB.ChatCollection)
+
+		return client
+	case MESSAGE:
+		client.Collection = client.Conn.
+			Database(client.Config.Database.MongoDB.Database).
+			Collection(client.Config.Database.MongoDB.MessageCollection)
+
+		return client
+	default:
+		client.Err = errors.New(fmt.Sprintf("Not Found Collection: %s", collection))
+
+		return client
+	}
 
 }
